@@ -53,13 +53,13 @@ class LightEntityWrapper(MerossDevice, LightEntity):
             h, s = kwargs[ATTR_HS_COLOR]
             rgb = color_util.color_hsv_to_RGB(h, s, 100)
             _LOGGER.debug("color change: rgb=%r -- h=%r s=%r" % (rgb, h, s))
-            await self._device.async_set_light_color(channel=self._channel_id, rgb=rgb, onoff=True, skip_rate_limits=True)
+            await self._device.async_set_light_color(channel=self._channel_id, rgb=rgb, temperature=None, onoff=True, skip_rate_limits=True)
         elif ATTR_COLOR_TEMP in kwargs:
             mired = kwargs[ATTR_COLOR_TEMP]
             norm_value = (mired - self.min_mireds) / (self.max_mireds - self.min_mireds)
             temperature = 100 - (norm_value * 100)
             _LOGGER.debug("temperature change: mired=%r meross=%r" % (mired, temperature))
-            await self._device.async_set_light_color(channel=self._channel_id, temperature=temperature, skip_rate_limits=True)
+            await self._device.async_set_light_color(channel=self._channel_id, rgb=None, temperature=temperature, skip_rate_limits=True)
 
         # Brightness must always be set, so take previous luminance if not explicitly set now.
         if ATTR_BRIGHTNESS in kwargs:
@@ -107,7 +107,6 @@ class LightEntityWrapper(MerossDevice, LightEntity):
             norm_value = (100 - value) / 100.0
             return self.min_mireds + (norm_value * (self.max_mireds - self.min_mireds))
         return None
-
 
 async def async_setup_entry(hass: HomeAssistantType, config_entry, async_add_entities):
     def entity_adder_callback():
